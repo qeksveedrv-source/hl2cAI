@@ -77,6 +77,8 @@ def ask_gemini_to_sql(user_prompt):
         "1. 只允許輸出 SELECT 查詢語句，絕不包含任何 Markdown 包裝。\n"
         "2. 面積單位為「平方公尺」，若使用者提及「坪」，請自行在條件或欄位中換算（1坪 = 3.3058平方公尺）。\n"
         "3. 在 SQL 語句末尾務必加上 LIMIT 20（除非使用者指定更多，但最多不超過 50）。"
+        "4. 注意：deal_date 是民國年月日（如 1150315；2026年請用 BETWEEN 1150101 AND 1151231）。\n"
+        "5. 【台灣地名標準化規則】實價登錄資料庫中的縣市、鄉鎮市區與路名，官方一律使用正體「臺」（例如：臺北市、臺中市、臺南市、臺東縣）。當使用者提問中使用俗體「台」（如台中、台東、台北），你在生成 SQL 的 WHERE 條件時，務必主動將其全部轉換為官方標準的「臺」。"
     )
     
     response = client.models.generate_content(
@@ -152,6 +154,7 @@ for message in st.session_state.messages:
 # 處理使用者輸入
 if user_input := st.chat_input("例如：幫我查吉安鄉最近總價 1000 萬以下的大樓交易"):
     
+    standardized_input = user_input.replace("台", "臺")
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
