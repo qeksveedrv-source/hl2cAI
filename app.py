@@ -79,6 +79,13 @@ def ask_gemini_to_sql(user_prompt):
         "3. 在 SQL 語句末尾務必加上 LIMIT 20（除非使用者指定更多，但最多不超過 50）。"
         "4. 注意：deal_date 是民國年月日（如 1150315；2026年請用 BETWEEN 1150101 AND 1151231）。\n"
         "5. 【台灣地名標準化規則】實價登錄資料庫中的縣市、鄉鎮市區與路名，官方一律使用正體「臺」（例如：臺北市、臺中市、臺南市、臺東縣）。當使用者提問中使用俗體「台」（如台中、台東、台北），你在生成 SQL 的 WHERE 條件時，務必主動將其全部轉換為官方標準的「臺」。"
+        "3. 在 SQL 語句末尾務必加上 LIMIT 20（除非使用者指定更多，但最多不超過 50）。\n"
+        "4. 注意：deal_date 是民國年月日（如 1150315；2026年請用 BETWEEN 1150101 AND 1151231）。\n"
+        "5. 【台灣地名標準化規則】實價登錄資料庫中的縣市、鄉鎮市區與路名，官方一律使用正體「臺」（例如：臺北市、臺中市、臺南市、臺東縣）。當使用者提問中使用俗體「台」（如台中、台東、台北），你在生成 SQL 的 WHERE 條件時，務必主動將其全部轉換為官方標準的「臺」。"
+        "6. 【訪價完整地址過濾規則】當使用者想要估價或訪價特定路名、街名或門牌時，請檢查他的提問中是否包含完整的「縣市與鄉鎮市區」（例如：花蓮縣吉安鄉、臺中市西屯區）。\n"
+        "7. 【不完整地址之處理】若使用者詢問特定路名/門牌行情，卻【沒有】提供縣市與鄉鎮市區（例如僅輸入「吉昌二街行情」或「中正路100號估價」），絕對不允許對全表進行模糊匹配！請立刻停止查詢，並直接生成以下這句 SQL 指令：\n"
+        "SELECT '請提供完整的「縣市與鄉鎮市區」（例如：花蓮縣吉安鄉），系統才能為您啟動極速定位並精準估價喔！' AS system_notice;\n"
+        "這樣能引導使用者補充完整資訊。"
     )
     
     response = client.models.generate_content(
@@ -138,7 +145,11 @@ def ask_gemini_to_explain(user_prompt, formatted_data):
 
 st.set_page_config(page_title="實價登錄 AI 助理", page_icon="🏠")
 st.title("🏠 實價登錄 AI 智慧助理")
-st.caption("自然語言查詢本地實價登錄資料庫，自動分析房市行情。")
+st.info(
+    "查詢特定門牌或路段時，**請務必輸入「完整的縣市與鄉鎮市區」**\n"
+    "*標準範例：**花蓮縣吉安鄉**吉昌二街xx號，20年30坪透天行情多少？*"
+)
+
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -152,7 +163,7 @@ for message in st.session_state.messages:
                 st.code(message["sql"], language="sql")
 
 # 處理使用者輸入
-if user_input := st.chat_input("例如：幫我查吉安鄉最近總價 1000 萬以下的大樓交易"):
+if user_input := st.chat_input("訪價請輸入完整地址及坪數"):
     
     standardized_input = user_input.replace("台", "臺")
     st.session_state.messages.append({"role": "user", "content": user_input})
