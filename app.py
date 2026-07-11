@@ -196,7 +196,7 @@ if user_input := st.chat_input("訪價請輸入完整地址及坪數"):
                             "sql": generated_sql
                         })
                     else:
-                        no_data_msg = "📭 目前資料庫中查無符合此條件的實價登錄交易紀錄。"
+                        no_data_msg = "📭 目前資料庫中查無符合條件的交易紀錄可參考。"
                         st.warning(no_data_msg)
                         st.session_state.messages.append({"role": "assistant", "content": no_data_msg, "sql": generated_sql})
                 else:
