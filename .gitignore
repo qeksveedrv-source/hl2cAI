@@ -1,0 +1,7 @@
+# 忽略隱私金鑰檔
+.streamlit/secrets.toml
+
+# 忽略 Python 虛擬環境與快取
+.venv/
+__pycache__/
+*.pyc
